@@ -8,8 +8,9 @@ import { SIZE_IN_BYTES as VAR_HEADER_SIZE_IN_BYTES, VarHeader } from './headers/
 
 import { TelemetrySample } from './telemetry-sample'
 import { readS3FileToBuffer } from "./utils/s3-helper";
-import { tsc --version, GetObjectCommand, GetObjectCommandOutput } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, GetObjectCommandOutput } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
+import {readSync} from "fs";
 
 // Return the Telemetry header from the supplied file descriptor
 const telemetryHeaderFromS3 = async (s3client: S3Client, bucket: string, key: string): Promise<TelemetryHeader> =>
@@ -95,52 +96,39 @@ export class TelemetryS3 {
   /**
      * Returns a stream of TelemetrySample objects
      */
-
-
   sampleStream (s3Client: S3Client): Observable<TelemetrySample> {
     return new Observable(subscriber => {
-      let count = 0
-      const chunkSize: number = this.telemetryHeader.bufLen
+      const chunkSize = this.telemetryHeader.bufLen;
       const getObjectCommand: GetObjectCommand = new GetObjectCommand({
         Bucket: this.s3bucket,
         Key: this.s3key,
-        Range: "bytes=" + this.telemetryHeader.bufOffset }
-      );
-      
-      s3Client.send(getObjectCommand).then(
-        (response: GetObjectCommandOutput) => {
-          if (response.Body instanceof Readable) {
-            const readable: Readable = response.Body as Readable;
-            let offset: number = this.telemetryHeader.bufOffset + (count++ * chunkSize);
+        Range: "bytes=" + this.telemetryHeader.bufOffset.toString() + "-"
+      });
 
-            readable.on('data', (chunk: Buffer) => {
-              readable.pause();
-              //We need to parse each sample from the Readable stream
-              //Process in a loop until we have no more data
+      //print the getobject command to the console in json format
+      console.log(JSON.stringify(getObjectCommand, null, 2));
 
+      let currentChunk: Buffer = Buffer.alloc(0);
 
-              // If we have more data than we need
-              if (offset + chunkSize <= chunk.length) {
-                const sampleBuffer: Buffer = chunk.slice(offset, offset + chunkSize);
+      s3Client.send(getObjectCommand)
+          .then(async (response: GetObjectCommandOutput) => {
+            if (response.Body instanceof Readable) {
+              for await (const chunk of response.Body) {
+                let remainingChunk: Buffer = Buffer.concat([currentChunk, chunk]);
 
-                offset += chunkSize;
-                subscriber.next(new TelemetrySample(sampleBuffer, this.varHeaders))
-
-                // If we've processed all data in this chunk
-                if (offset === chunk.length) {
-                  offset = 0;
-                  readable.resume();
+                while (remainingChunk.length >= chunkSize) {
+                  const sample = remainingChunk.slice(0, chunkSize);
+                  subscriber.next(new TelemetrySample(sample, this.varHeaders));
+                  remainingChunk = remainingChunk.slice(chunkSize);
                 }
-              } else {
-                // If we have less data than we need
-                // Note: we leave the stream paused until we get enough data
-                offset = chunk.length;
+
+                currentChunk = remainingChunk;
               }
-            });
-          }
-        }
-      )
-      subscriber.complete()
+            }
+
+            subscriber.complete();
+          })
+          .catch(error => subscriber.error(error));
     })
   }
 }
