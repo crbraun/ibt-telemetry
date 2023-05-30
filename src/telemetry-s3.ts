@@ -96,7 +96,7 @@ export class TelemetryS3 {
   /**
      * Returns a stream of TelemetrySample objects
      */
-  sampleStream (s3Client: S3Client): Observable<TelemetrySample> {
+  sampleStream(s3Client: S3Client): Observable<TelemetrySample> {
     return new Observable(subscriber => {
       const chunkSize = this.telemetryHeader.bufLen;
       const getObjectCommand: GetObjectCommand = new GetObjectCommand({
@@ -120,6 +120,8 @@ export class TelemetryS3 {
                   const sample = remainingChunk.slice(0, chunkSize);
                   subscriber.next(new TelemetrySample(sample, this.varHeaders));
                   remainingChunk = remainingChunk.slice(chunkSize);
+
+                  await new Promise(resolve => setTimeout(resolve, 5)); // Adjust the delay time (in milliseconds) to control the rate of emission
                 }
 
                 currentChunk = remainingChunk;
