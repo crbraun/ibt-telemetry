@@ -104,7 +104,6 @@ export class TelemetryS3 {
         Key: this.s3key,
         Range: "bytes=" + this.telemetryHeader.bufOffset.toString() + "-"
       });
-
       //print the getobject command to the console in json format
       console.log(JSON.stringify(getObjectCommand, null, 2));
 
@@ -121,7 +120,7 @@ export class TelemetryS3 {
                   subscriber.next(new TelemetrySample(sample, this.varHeaders));
                   remainingChunk = remainingChunk.slice(chunkSize);
 
-                  await new Promise(resolve => setTimeout(resolve, 5)); // Adjust the delay time (in milliseconds) to control the rate of emission
+                  await new Promise(resolve => setTimeout(resolve, 2)); // Adjust the delay time (in milliseconds) to control the rate of emission
                 }
 
                 currentChunk = remainingChunk;
