@@ -10,7 +10,6 @@ import { TelemetrySample } from './telemetry-sample'
 import { readS3FileToBuffer } from "./utils/s3-helper";
 import { S3Client, GetObjectCommand, GetObjectCommandOutput } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
-import {readSync} from "fs";
 
 // Return the Telemetry header from the supplied file descriptor
 const telemetryHeaderFromS3 = async (s3client: S3Client, bucket: string, key: string): Promise<TelemetryHeader> =>
@@ -96,7 +95,7 @@ export class TelemetryS3 {
   /**
      * Returns a stream of TelemetrySample objects
      */
-  sampleStream(s3Client: S3Client): Observable<TelemetrySample> {
+  sampleStream(s3Client: S3Client, processingDelay: number): Observable<TelemetrySample> {
     return new Observable(subscriber => {
       const chunkSize = this.telemetryHeader.bufLen;
       const getObjectCommand: GetObjectCommand = new GetObjectCommand({
@@ -120,7 +119,7 @@ export class TelemetryS3 {
                   subscriber.next(new TelemetrySample(sample, this.varHeaders));
                   remainingChunk = remainingChunk.slice(chunkSize);
 
-                  await new Promise(resolve => setTimeout(resolve, 2)); // Adjust the delay time (in milliseconds) to control the rate of emission
+                  await new Promise(resolve => setTimeout(resolve, processingDelay)); // Adjust the delay time (in milliseconds) to control the rate of emission
                 }
 
                 currentChunk = remainingChunk;
