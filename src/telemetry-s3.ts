@@ -107,6 +107,7 @@ export class TelemetryS3 {
       console.log(JSON.stringify(getObjectCommand, null, 2));
 
       let currentChunk: Buffer = Buffer.alloc(0);
+      let emitCounter = 0;  // Counter to track when to insert a delay
 
       s3Client.send(getObjectCommand)
           .then(async (response: GetObjectCommandOutput) => {
@@ -119,7 +120,12 @@ export class TelemetryS3 {
                   subscriber.next(new TelemetrySample(sample, this.varHeaders));
                   remainingChunk = remainingChunk.slice(chunkSize);
 
-                  await new Promise(resolve => setTimeout(resolve, processingDelay)); // Adjust the delay time (in milliseconds) to control the rate of emission
+                  emitCounter++;
+
+                  if (emitCounter % 100 === 0) { // Insert a delay every 100 emits
+                    await new Promise(resolve => setTimeout(resolve, processingDelay));
+                  }
+
                 }
 
                 currentChunk = remainingChunk;
