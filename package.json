@@ -1,5 +1,5 @@
 {
-  "name": "ibt-telemetry",
+  "name": "@crbraun/ibt-telemetry",
   "version": "1.1.0",
   "description": "iRacing ibt parser",
   "keywords": [
@@ -16,17 +16,11 @@
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "src",
-    "tsconfig.json",
-    "tsconfig.build.json"
-  ],
   "scripts": {
     "compile": "npm run lint && tsc -p tsconfig.build.json",
     "lint": "eslint '**/*.{js,ts}'",
     "test:dependencies": "depcruise --validate .dependency-cruiser.js src",
-    "prepublish": "npm run compile",
-    "postinstall": "tsc -p tsconfig.build.json"
+    "prepublish": "npm run compile"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.335.0",
