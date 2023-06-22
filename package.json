@@ -16,6 +16,10 @@
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "src",
+    "tsconfig.build.json"
+  ],
   "scripts": {
     "compile": "npm run lint && tsc -p tsconfig.build.json",
     "lint": "eslint '**/*.{js,ts}'",
