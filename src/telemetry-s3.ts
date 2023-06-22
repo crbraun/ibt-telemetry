@@ -95,7 +95,7 @@ export class TelemetryS3 {
   /**
      * Returns a stream of TelemetrySample objects
      */
-git commit   sampleStream(s3Client: S3Client, throttleProperties: any): Observable<TelemetrySample> {
+sampleStream(s3Client: S3Client, throttleProperties: any): Observable<TelemetrySample> {
     return new Observable(subscriber => {
       const chunkSize = this.telemetryHeader.bufLen;
       const getObjectCommand: GetObjectCommand = new GetObjectCommand({
