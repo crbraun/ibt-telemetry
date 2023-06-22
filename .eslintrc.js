@@ -3,7 +3,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion:  2018,
-    sourceType: 'module',
+    sourceType: 'module'
   },
   rules: {
     "@typescript-eslint/no-explicit-any": "off",               // TODO: Remove
@@ -19,10 +19,10 @@ module.exports = {
       }
     ],
 
-    "array-bracket-spacing": ["error", "always", { "objectsInArrays": false, "arraysInArrays": false }],
-    "object-curly-spacing": ["error", "always"],
-    "space-before-function-paren": ["error", "always"],
-    "eol-last": ["error", "always"],
-    "comma-dangle": ["error", "never"],
+    "array-bracket-spacing": [ "error", "always", { "objectsInArrays": false, "arraysInArrays": false }],
+    "object-curly-spacing": [ "error", "always" ],
+    "space-before-function-paren": [ "error", "always" ],
+    "eol-last": [ "error", "always" ],
+    "comma-dangle": [ "error", "never" ]
   }
 }

@@ -95,7 +95,7 @@ export class TelemetryS3 {
   /**
      * Returns a stream of TelemetrySample objects
      */
-sampleStream(s3Client: S3Client, throttleProperties: any): Observable<TelemetrySample> {
+  sampleStream (s3Client: S3Client, throttleProperties: any): Observable<TelemetrySample> {
     return new Observable(subscriber => {
       const chunkSize = this.telemetryHeader.bufLen;
       const getObjectCommand: GetObjectCommand = new GetObjectCommand({
@@ -110,31 +110,31 @@ sampleStream(s3Client: S3Client, throttleProperties: any): Observable<TelemetryS
       let emitCounter = 0;  // Counter to track when to insert a delay
 
       s3Client.send(getObjectCommand)
-          .then(async (response: GetObjectCommandOutput) => {
-            if (response.Body instanceof Readable) {
-              for await (const chunk of response.Body) {
-                let remainingChunk: Buffer = Buffer.concat([currentChunk, chunk]);
+        .then(async (response: GetObjectCommandOutput) => {
+          if (response.Body instanceof Readable) {
+            for await (const chunk of response.Body) {
+              let remainingChunk: Buffer = Buffer.concat([ currentChunk, chunk ]);
 
-                while (remainingChunk.length >= chunkSize) {
-                  const sample = remainingChunk.slice(0, chunkSize);
-                  subscriber.next(new TelemetrySample(sample, this.varHeaders));
-                  remainingChunk = remainingChunk.slice(chunkSize);
+              while (remainingChunk.length >= chunkSize) {
+                const sample = remainingChunk.slice(0, chunkSize);
+                subscriber.next(new TelemetrySample(sample, this.varHeaders));
+                remainingChunk = remainingChunk.slice(chunkSize);
 
-                  emitCounter++;
+                emitCounter++;
 
-                  if (emitCounter % throttleProperties.delayEveryNSamples === 0) { // Insert a delay every 50 emits
-                    await new Promise(resolve => setTimeout(resolve, throttleProperties.processingDelay));
-                  }
-
+                if (emitCounter % throttleProperties.delayEveryNSamples === 0) { // Insert a delay every 50 emits
+                  await new Promise(resolve => setTimeout(resolve, throttleProperties.processingDelay));
                 }
 
-                currentChunk = remainingChunk;
               }
-            }
 
-            subscriber.complete();
-          })
-          .catch(error => subscriber.error(error));
+              currentChunk = remainingChunk;
+            }
+          }
+
+          subscriber.complete();
+        })
+        .catch(error => subscriber.error(error));
     })
   }
 }

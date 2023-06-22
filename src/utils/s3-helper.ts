@@ -26,37 +26,3 @@ export function readS3FileToBuffer (s3Client: S3Client, bucket: string, key: str
       .catch(reject);
   });
 }
-
-/** 
- * Read bytes from a Node.js readable stream and put them into a Buffer, return the Buffer 
- **/
-function readBytes (readable: Readable, byteCount: number): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    let remainingBytes = byteCount;
-    const chunks: Buffer[] = [];
-
-    readable.on('data', (chunk: Buffer) => {
-      if (remainingBytes >= chunk.length) {
-        chunks.push(chunk);
-        remainingBytes -= chunk.length;
-      } else {
-        chunks.push(chunk.slice(0, remainingBytes));
-        remainingBytes = 0;
-        readable.pause();
-        resolve(Buffer.concat(chunks));
-      }
-    });
-
-    readable.on('end', () => {
-      if (remainingBytes > 0) {
-        reject(new Error(`Stream ended before reading all the bytes (missing ${remainingBytes} bytes)`));
-      } else {
-        resolve(Buffer.concat(chunks));
-      }
-    });
-
-    readable.on('error', (error) => {
-      reject(error);
-    });
-  });
-}

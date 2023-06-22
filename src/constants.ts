@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 export interface IrsdkPaceMode {
   irsdk_PaceModeSingleFileStart: number
   irsdk_PaceModeDoubleFileStart: number
