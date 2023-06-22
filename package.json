@@ -21,7 +21,7 @@
     "lint": "eslint '**/*.{js,ts}'",
     "test:dependencies": "depcruise --validate .dependency-cruiser.js src",
     "prepublish": "npm run compile",
-    "postinstall": "npm run compile"
+    "postinstall": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.335.0",
