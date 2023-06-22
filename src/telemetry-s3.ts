@@ -95,7 +95,7 @@ export class TelemetryS3 {
   /**
      * Returns a stream of TelemetrySample objects
      */
-  sampleStream(s3Client: S3Client, processingDelay: number): Observable<TelemetrySample> {
+git commit   sampleStream(s3Client: S3Client, throttleProperties: any): Observable<TelemetrySample> {
     return new Observable(subscriber => {
       const chunkSize = this.telemetryHeader.bufLen;
       const getObjectCommand: GetObjectCommand = new GetObjectCommand({
@@ -122,8 +122,8 @@ export class TelemetryS3 {
 
                   emitCounter++;
 
-                  if (emitCounter % 100 === 0) { // Insert a delay every 100 emits
-                    await new Promise(resolve => setTimeout(resolve, processingDelay));
+                  if (emitCounter % throttleProperties.delayEveryNSamples === 0) { // Insert a delay every 50 emits
+                    await new Promise(resolve => setTimeout(resolve, throttleProperties.processingDelay));
                   }
 
                 }
