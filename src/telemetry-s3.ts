@@ -46,6 +46,7 @@ const varHeadersFromS3 = async (s3client: S3Client, bucket: string, key: string,
  */
 export class TelemetryS3 {
   public sessionInfo: any
+  public fileName: string
 
   /**
      * Telemetry constructor.
@@ -59,6 +60,7 @@ export class TelemetryS3 {
     private readonly s3key: string
   ) {
     this.sessionInfo = safeLoadYaml(sessionInfoYaml)
+    this.fileName = this.s3key
   }
 
   static async fromS3Object (s3client: S3Client, bucket: string, key: string): Promise<TelemetryS3> {
