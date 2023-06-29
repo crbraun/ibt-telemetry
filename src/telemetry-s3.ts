@@ -1,6 +1,7 @@
 import { safeLoad as safeLoadYaml } from 'js-yaml'
 import { Observable } from 'rxjs'
 import { range } from 'ramda'
+import * as crypto from 'crypto';
 
 import { SIZE_IN_BYTES as HEADER_SIZE_IN_BYTES, TelemetryHeader } from './headers/telemetry-header'
 import { SIZE_IN_BYTES as DISK_SUB_HEADER_SIZE_IN_BYTES, DiskSubHeader } from './headers/disk-sub-header'
@@ -74,22 +75,17 @@ export class TelemetryS3 {
       varHeadersFromS3(s3client, bucket, key, telemetryHeader)
     ])
 
+
+
     return new TelemetryS3(telemetryHeader, diskSubHeader, sessionInfo, varHeaders, bucket, key)
   }
 
   /**
      * Generate a unique key for the telemetry session.
-     *
-     * The unique key is a combination of 3 fields:
-     *   accountId-sessionId-subSessionId
-     *
      * @return string
      */
   uniqueId () {
-    const accountId = this.sessionInfo.DriverInfo.Drivers[this.sessionInfo.DriverInfo.DriverCarIdx].UserID
-    const sessionId = this.sessionInfo.WeekendInfo.SessionID
-    const subSessionId = this.sessionInfo.WeekendInfo.SubSessionID
-    return `${accountId}-${sessionId}-${subSessionId}`
+    return crypto.createHash('md5').update(JSON.stringify(this.sessionInfo)).digest('hex');
   }
 
   /**
