@@ -30,7 +30,7 @@ const diskSubHeaderFromFileDescriptor = async (fd: number): Promise<DiskSubHeade
 
 const sessionInfoStringFromFileDescriptor = async (fd: number, telemetryHeader: TelemetryHeader): Promise<string> =>
   readFileToBuffer(fd, telemetryHeader.sessionInfoOffset, telemetryHeader.sessionInfoLength)
-    .then(x => x.toString('cp1252'))
+    .then(x => x.toString('latin1'))
 
 const varHeadersFromFileDescriptor = async (fd: number, telemetryHeader: TelemetryHeader): Promise<VarHeader[]> => {
   const numberOfVariables = telemetryHeader.numVars
