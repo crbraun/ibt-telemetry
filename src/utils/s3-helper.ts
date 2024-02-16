@@ -16,7 +16,6 @@ export function readS3FileToBuffer (s3Client: S3Client, bucket: string, key: str
         const chunks: Buffer[] = [];
         if (response.Body instanceof Readable) {
           const stream = response.Body;
-          stream.setEncoding('utf8')
           stream.on('data', (chunk: Buffer) => chunks.push(chunk));
           stream.on('end', () => resolve(Buffer.concat(chunks)));
           stream.on('error', reject);

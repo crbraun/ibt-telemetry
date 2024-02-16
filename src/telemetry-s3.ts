@@ -24,9 +24,9 @@ const diskSubHeaderFromS3 = async (s3client: S3Client, bucket: string, key: stri
 
 const sessionInfoStringFromS3 = async (s3client: S3Client, bucket: string, key: string, telemetryHeader: TelemetryHeader): Promise<string> =>
   readS3FileToBuffer(s3client, bucket, key, telemetryHeader.sessionInfoOffset, telemetryHeader.sessionInfoLength)
-    .then(x => x.toString('ascii'))
+    .then(x => x.toString('utf-8'))
 
-const varHeadersFromS3 = async (s3client: S3Client, bucket: string, key: string, telemetryHeader: TelemetryHeader): Promise<VarHeader[]> => {
+const varHeadersFromS3 = async (s3client: S3Client, buxcket: string, key: string, telemetryHeader: TelemetryHeader): Promise<VarHeader[]> => {
   const numberOfVariables = telemetryHeader.numVars
   const startPosition = telemetryHeader.varHeaderOffset
   const fullBufferSize = numberOfVariables * VAR_HEADER_SIZE_IN_BYTES
